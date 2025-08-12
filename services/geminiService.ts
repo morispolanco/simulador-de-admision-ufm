@@ -1,4 +1,3 @@
-
 import { GoogleGenAI, Type } from "@google/genai";
 import { Question, TestType } from '../types';
 import { shuffle } from '../utils/shuffle';
@@ -48,12 +47,11 @@ const getPromptForTest = (testType: TestType, section: string, count: number): s
 type RawQuestion = Omit<Question, 'id' | 'section'>;
 
 export const generateQuestions = async (testType: TestType, sections: string[], questionsPerSection: { [key: string]: number }): Promise<Question[]> => {
-    // The Gemini API key is expected to be in `process.env.API_KEY`.
-    // The GoogleGenAI constructor will handle it, and the app's error boundary
-    // will catch any issues if the key is missing or invalid.
-    const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
-
     try {
+        // Instantiating the AI client inside the try block to catch initialization errors,
+        // such as a missing API key. The key is expected to be in `process.env.API_KEY`.
+        const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
+
         console.log(`Generating questions for ${testType} using Gemini API`);
         const allQuestions: Question[] = [];
         let globalId = 1;
@@ -117,8 +115,9 @@ export const generateQuestions = async (testType: TestType, sections: string[], 
         
         const errorMessage = error instanceof Error ? error.message : 'Ocurrió un error desconocido.';
         
-        // Provide a more user-friendly error message for API key issues
-        if (errorMessage.includes('API key not valid') || errorMessage.includes('API_KEY')) {
+        // Provide a more user-friendly error message for API key issues.
+        // The check is case-insensitive and covers various ways the SDK might report the error.
+        if (errorMessage.toLowerCase().includes('api key')) {
             throw new Error('La clave API de Google no es válida o no está configurada. El administrador debe verificar la variable de entorno API_KEY.');
         }
 
