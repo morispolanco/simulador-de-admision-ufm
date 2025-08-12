@@ -29,7 +29,8 @@ const App: React.FC = () => {
             setView('test');
         } catch (err) {
             console.error(err);
-            setError('Error al generar las preguntas. Por favor, inténtalo de nuevo.');
+            const errorMessage = err instanceof Error ? err.message : 'Ocurrió un error desconocido.';
+            setError(`Error al generar las preguntas. ${errorMessage} Por favor, inténtalo de nuevo.`);
             setView('home');
         }
     }, []);
@@ -70,7 +71,6 @@ const App: React.FC = () => {
                     <div className="flex flex-col items-center justify-center h-full pt-20">
                         <div className="animate-spin rounded-full h-32 w-32 border-t-2 border-b-2 border-blue-500"></div>
                         <p className="mt-4 text-lg font-semibold">Generando tu examen... Por favor espera.</p>
-                        {error && <p className="text-red-500 mt-2">{error}</p>}
                     </div>
                 );
             case 'test':
@@ -94,7 +94,7 @@ const App: React.FC = () => {
                 return <HistoryScreen onViewResult={setLastResult} onSwitchView={setView} />;
             case 'home':
             default:
-                return <HomeScreen onStartTest={startTest} />;
+                return <HomeScreen onStartTest={startTest} error={error} />;
         }
     };
     

@@ -7,6 +7,11 @@ interface PaymentModalProps {
     testType: TestType | null;
 }
 
+// IMPORTANT: Replace this with your actual Price ID from your Stripe Dashboard.
+// This ID corresponds to the product and price you want to charge.
+const STRIPE_PRICE_ID = 'price_1PbiZwRxYfLdRwPAyHh2fV2x';
+
+
 const PaymentModal: React.FC<PaymentModalProps> = ({ onClose, testType }) => {
     const stripe = useStripe();
     const [isProcessing, setIsProcessing] = useState(false);
@@ -18,11 +23,8 @@ const PaymentModal: React.FC<PaymentModalProps> = ({ onClose, testType }) => {
             return;
         }
 
-        // Esta es la clave del precio que creaste en tu Dashboard de Stripe.
-        // Asegúrate de configurarla como una variable de entorno.
-        const priceId = process.env.STRIPE_PRICE_ID;
-        if (!priceId) {
-            setError('Error de configuración: El ID de precio de Stripe no está disponible.');
+        if (!STRIPE_PRICE_ID || !STRIPE_PRICE_ID.startsWith('price_')) {
+            setError('Error de configuración: El ID de precio de Stripe no está disponible o es inválido.');
             return;
         }
 
@@ -30,9 +32,9 @@ const PaymentModal: React.FC<PaymentModalProps> = ({ onClose, testType }) => {
         setError(null);
 
         const { error: stripeError } = await stripe.redirectToCheckout({
-            lineItems: [{ price: priceId, quantity: 1 }],
+            lineItems: [{ price: STRIPE_PRICE_ID, quantity: 1 }],
             mode: 'payment',
-            // El ?payment=success se usará para detectar un pago exitoso al volver.
+            // The ?payment=success will be used to detect a successful payment upon return.
             successUrl: `${window.location.origin}${window.location.pathname}?payment=success`,
             cancelUrl: `${window.location.origin}${window.location.pathname}`,
         });
